@@ -6,194 +6,443 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Restaurant Bill Management</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
-            color: #333;
+        :root {
+            --bg: #fff7ed;
+            --surface: rgba(255, 250, 244, 0.9);
+            --surface-strong: #fffdf9;
+            --ink: #3a2418;
+            --muted: #7d5b49;
+            --primary: #c96a2b;
+            --primary-strong: #8f3d12;
+            --accent: #2f6f57;
+            --accent-soft: #dff2e8;
+            --border: rgba(122, 67, 34, 0.16);
+            --shadow: 0 24px 60px rgba(94, 51, 25, 0.14);
         }
 
-        h3,
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at top left, rgba(245, 180, 89, 0.35), transparent 28%),
+                radial-gradient(circle at top right, rgba(47, 111, 87, 0.22), transparent 30%),
+                linear-gradient(135deg, #fff4ea 0%, #fffaf3 46%, #fef2e5 100%);
+            padding: 32px 18px 22px;
+        }
+
+        .page-shell {
+            max-width: 1180px;
+            margin: 0 auto;
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.65);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            animation: riseIn 0.7s ease;
+        }
+
+        .hero {
+            position: relative;
+            padding: 38px 48px 26px;
+            background:
+                linear-gradient(120deg, rgba(201, 106, 43, 0.95), rgba(143, 61, 18, 0.9)),
+                linear-gradient(135deg, #c96a2b, #8f3d12);
+            color: #fff9f3;
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            inset: auto -60px -80px auto;
+            width: 240px;
+            height: 240px;
+            background: radial-gradient(circle, rgba(255, 232, 201, 0.35), transparent 65%);
+            border-radius: 50%;
+        }
+
+        .hero h3 {
+            margin: 0;
+            font-size: clamp(2rem, 4vw, 3rem);
+            letter-spacing: 0.04em;
+        }
+
+        .hero p {
+            margin: 10px 0 0;
+            max-width: 700px;
+            color: rgba(255, 248, 241, 0.88);
+            font-size: 1rem;
+        }
+
+        .hero-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .hero-badges span {
+            padding: 10px 16px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 0.92rem;
+            backdrop-filter: blur(8px);
+        }
+
+        .content {
+            padding: 32px 38px 20px;
+        }
+
+        .section-card {
+            background: var(--surface-strong);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 24px;
+            box-shadow: 0 16px 34px rgba(90, 57, 36, 0.08);
+        }
+
         h5 {
-            text-align: center;
-            color: #2c3e50;
-            text-shadow: 1px 1px 2px #bdc3c7;
+            margin: 0 0 18px;
+            font-size: 1.15rem;
+            color: var(--primary-strong);
+            letter-spacing: 0.03em;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
         label {
-            display: inline-block;
-            width: 120px;
-            margin-top: 10px;
-            color: #34495e;
-            font-weight: 600;
+            color: var(--muted);
+            font-weight: 700;
+            font-size: 0.95rem;
         }
 
         input[type="text"],
         input[type="number"],
-        input[type="date"] {
-            padding: 5px;
-            width: 200px;
-            margin-top: 10px;
-            border: 1px solid #2980b9;
-            border-radius: 4px;
-            background-color: #ecf0f1;
-            transition: border-color 0.3s ease;
+        input[type="date"],
+        select {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(201, 106, 43, 0.24);
+            background: #fff;
+            color: var(--ink);
+            font-size: 0.96rem;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
         }
 
         input[type="text"]:focus,
         input[type="number"]:focus,
-        input[type="date"]:focus {
-            border-color: #3498db;
+        input[type="date"]:focus,
+        select:focus,
+        .border:hover {
             outline: none;
-            background-color: #ffffff;
+            border-color: rgba(201, 106, 43, 0.75);
+            box-shadow: 0 0 0 4px rgba(201, 106, 43, 0.12);
+            transform: translateY(-1px);
+        }
+
+        .table-card {
+            margin-top: 24px;
         }
 
         table {
-            width: 90%;
-            margin: 20px auto;
+            width: 100%;
+            margin: 0;
             border-collapse: collapse;
             text-align: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border-radius: 8px;
             overflow: hidden;
+            border-radius: 18px;
         }
 
-        table,
+        thead tr {
+            background: linear-gradient(135deg, #2f6f57, #3d8d70);
+            color: white;
+        }
+
         th,
         td {
-            border: 1px solid #2980b9;
+            border-bottom: 1px solid rgba(122, 67, 34, 0.1);
+            padding: 16px 12px;
         }
 
-        th {
-            background-color: #3498db;
-            color: white;
-            padding: 12px;
+        tbody tr {
+            background: rgba(255, 250, 245, 0.78);
+            transition: transform 0.2s ease, background-color 0.2s ease;
         }
 
         tbody tr:nth-child(even) {
-            background-color: #d6eaf8;
+            background: rgba(255, 245, 235, 0.9);
         }
 
-        tbody tr:nth-child(odd) {
-            background-color: #ebf5fb;
-        }
-
-        td {
-            padding: 10px;
-            color: #2c3e50;
-        }
-
-        #addItemBtn {
-            margin: 10px auto;
-            display: block;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            background-color: #2980b9;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            box-shadow: 0 4px 6px rgba(41, 128, 185, 0.4);
-            transition: background-color 0.3s ease;
-        }
-
-        #addItemBtn:hover {
-            background-color: #3498db;
+        tbody tr:hover {
+            background: #fff;
+            transform: scale(1.003);
         }
 
         button {
-            background-color: #e74c3c;
-            color: white;
             border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
+            border-radius: 14px;
             cursor: pointer;
-            box-shadow: 0 2px 4px rgba(231, 76, 60, 0.4);
-            transition: background-color 0.3s ease;
+            transition: transform 0.22s ease, box-shadow 0.22s ease, filter 0.22s ease;
         }
 
         button:hover {
-            background-color: #c0392b;
+            transform: translateY(-2px);
+            filter: brightness(1.03);
+        }
+
+        #addItemBtn,
+        #printBillBtn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 13px 22px;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        #addItemBtn {
+            margin-top: 18px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+            color: white;
+            box-shadow: 0 16px 28px rgba(201, 106, 43, 0.26);
+        }
+
+        .remove-btn {
+            background: linear-gradient(135deg, #d9583b, #a93027);
+            color: white;
+            padding: 9px 14px;
+            box-shadow: 0 10px 18px rgba(169, 48, 39, 0.18);
+        }
+
+        .actions-bar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 18px;
+            align-items: center;
+            margin-top: 24px;
         }
 
         #totals {
-            width: 90%;
-            margin: 20px auto;
-            text-align: right;
-        }
-
-        #totals label {
-            width: auto;
-            margin-right: 20px;
-            color: #34495e;
-            font-weight: 600;
+            min-width: 290px;
+            margin-left: auto;
+            padding: 20px 22px;
+            background: linear-gradient(180deg, #fffdf8, #fff6eb);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
         }
 
         #totals div {
-            margin: 5px 0;
-            font-size: 16px;
-            color: #2c3e50;
-        }
-        .nav-invoice{
             display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+            font-size: 1rem;
+            color: var(--ink);
         }
-        .border:hover{
-            border: 2px solid #34495e;
+
+        #totals label {
+            color: var(--muted);
         }
-        .nav-bill{
-            display: flex;
+
+        .grand-total {
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px dashed rgba(122, 67, 34, 0.24);
+            font-size: 1.14rem;
+            font-weight: 800;
+        }
+
+        #printBillBtn {
+            background: linear-gradient(135deg, #2f6f57, #224f40);
+            color: white;
+            box-shadow: 0 18px 30px rgba(47, 111, 87, 0.24);
+        }
+
+        footer {
+            padding: 22px 38px 30px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        footer strong {
+            color: var(--primary-strong);
+        }
+
+        @keyframes riseIn {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .content,
+            .hero,
+            footer {
+                padding-left: 22px;
+                padding-right: 22px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .actions-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            #totals {
+                width: 100%;
+                min-width: 0;
+            }
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 14px;
+            }
+
+            .page-shell {
+                border-radius: 22px;
+            }
+
+            .hero h3 {
+                font-size: 1.8rem;
+            }
+
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .page-shell {
+                box-shadow: none;
+                border: none;
+                background: white;
+            }
+
+            #addItemBtn,
+            #printBillBtn,
+            .remove-btn {
+                display: none !important;
+            }
         }
     </style>
 </head>
 
 <body>
-    <h3>Restaurant Billing Invoice</h3>
-    <hr />
-    <section style="width: 90%; margin: auto;">
-        <h5>Invoice Details:</h5>
-        <div class="nav-invoice">
-            <label for="invoiceNumber">Invoice Number:</label>
-            <input class="border" type="text" id="invoiceNumber" required />
-            <label for="invoiceDate" style="margin-left: 40px;">Invoice Date:</label>
-            <input class="border" type="date" id="invoiceDate" required />
-            <label for="dueDate" style="margin-left: 40px;">Due Date:</label>
-            <input class="border" type="date" id="dueDate" required />
+    <div class="page-shell">
+        <section class="hero">
+            <h3>Raj's Restaurant</h3>
+            <p>Create polished food bills quickly with a warm restaurant-inspired interface, easier item management, and a cleaner print-ready summary.</p>
+            <div class="hero-badges">
+                <span>Fast Invoice Entry</span>
+                <span>Elegant Billing Layout</span>
+                <span>Print-Ready Receipt</span>
+            </div>
+        </section>
+
+        <div class="content">
+            <section class="section-card">
+                <h5>Invoice Details</h5>
+                <div class="form-grid">
+                    <div class="field">
+                        <label for="invoiceNumber">Invoice Number</label>
+                        <input class="border" type="text" id="invoiceNumber" required />
+                    </div>
+                    <div class="field">
+                        <label for="invoiceDate">Invoice Date</label>
+                        <input class="border" type="date" id="invoiceDate" required />
+                    </div>
+                    <div class="field">
+                        <label for="dueDate">Due Date</label>
+                        <input class="border" type="date" id="dueDate" required />
+                    </div>
+                </div>
+
+                <h5 style="margin-top: 28px;">Bill To</h5>
+                <div class="form-grid">
+                    <div class="field">
+                        <label for="customerName">Full Name</label>
+                        <input class="border" type="text" id="customerName" required />
+                    </div>
+                    <div class="field">
+                        <label for="customerAddress">Address</label>
+                        <input class="border" type="text" id="customerAddress" required />
+                    </div>
+                    <div class="field">
+                        <label for="customerContact">Contact</label>
+                        <input class="border" type="text" id="customerContact" required />
+                    </div>
+                </div>
+            </section>
+
+            <section class="section-card table-card">
+                <h5>Itemized Bill</h5>
+                <table id="billTable">
+                    <thead>
+                        <tr>
+                            <th>Food Name</th>
+                            <th>Quantity</th>
+                            <th>Unit Price</th>
+                            <th>Total</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="billBody">
+                    </tbody>
+                </table>
+
+                <div class="actions-bar">
+                    <button id="addItemBtn">Add Item</button>
+
+                    <section id="totals">
+                        <div><label>Subtotal</label> <span id="subtotal">0.00</span></div>
+                        <div><label>Tax (5%)</label> <span id="tax">0.00</span></div>
+                        <div><label>Tip (10%)</label> <span id="tip">0.00</span></div>
+                        <div class="grand-total"><label><strong>Total</strong></label> <span id="total">0.00</span></div>
+                    </section>
+                </div>
+
+                <div style="margin-top: 24px; text-align: center;">
+                    <button id="printBillBtn">Print Bill</button>
+                </div>
+            </section>
         </div>
-        <h5>Bill To:</h5>
-        <div class="nav-bill">
-            <label for="customerName">Full Name:</label>
-            <input class="border" type="text" id="customerName" required />
-            <label for="customerAddress" style="margin-left: 40px;">Address:</label>
-            <input class="border" type="text" id="customerAddress" required />
-            <label for="customerContact" style="margin-left: 40px;">Contact:</label>
-            <input class="border" type="text" id="customerContact" required />
-        </div>
-    </section>
-
-    <h5>Itemized Bill</h5>
-    <table id="billTable">
-        <thead>
-            <tr>
-                <th>Food Name</th>
-                <th>Quantity</th>
-                <th>Unit Price</th>
-                <th>Total</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody id="billBody">
-        </tbody>
-    </table>
-    <button id="addItemBtn">Add Item</button>
-
-    <section id="totals">
-        <div><label>Subtotal:</label> <span id="subtotal">0.00</span></div>
-        <div><label>Tax (5%):</label> <span id="tax">0.00</span></div>
-        <div><label>Tip (10%):</label> <span id="tip">0.00</span></div>
-        <div><label><strong>Total:</strong></label> <span id="total">0.00</span></div>
-    </section>
-
-    <button id="printBillBtn" style="margin: 20px auto; display: block; padding: 10px 20px; font-size: 16px; cursor: pointer; background-color: #27ae60; color: white; border: none; border-radius: 6px; box-shadow: 0 4px 6px rgba(39, 174, 96, 0.4); transition: background-color 0.3s ease;">Print Bill</button>
 
     <script>
         const billBody = document.getElementById('billBody');
@@ -233,7 +482,6 @@
 
             const descTd = document.createElement('td');
             const descSelect = document.createElement('select');
-            descSelect.style.width = '150px';
             const defaultOption = document.createElement('option');
             defaultOption.value = '';
             defaultOption.textContent = 'Select';
@@ -263,7 +511,7 @@
             const actionTd = document.createElement('td');
             const removeBtn = document.createElement('button');
             removeBtn.textContent = 'Remove';
-            removeBtn.style.cursor = 'pointer';
+            removeBtn.className = 'remove-btn';
             removeBtn.addEventListener('click', () => {
                 tr.remove();
                 updateTotals();
@@ -330,8 +578,22 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             const invoiceInput = document.getElementById('invoiceNumber');
+            const invoiceDateInput = document.getElementById('invoiceDate');
+            const dueDateInput = document.getElementById('dueDate');
+            const footerYear = document.getElementById('footerYear');
+
             if (invoiceInput) {
                 invoiceInput.value = generateInvoiceNumber();
+            }
+            const today = new Date().toISOString().split('T')[0];
+            if (invoiceDateInput) {
+                invoiceDateInput.value = today;
+            }
+            if (dueDateInput) {
+                dueDateInput.value = today;
+            }
+            if (footerYear) {
+                footerYear.textContent = new Date().getFullYear();
             }
             const printBtn = document.getElementById('printBillBtn');
             if (printBtn) {
@@ -341,8 +603,9 @@
             }
         });
     </script>
-    <footer style="text-align: center; margin: 20px 0; font-size: 14px; color: #777;">
-        &copy; 2025 || bihari.mali2023@ssimt.com || Raipur (C.G.)
-    </footer>
+        <footer>
+            <strong>&copy; <span id="footerYear"></span> Restaurant Billing Generator</strong> | Crafted for modern food invoice creation.
+        </footer>
+    </div>
 </body>
 </html>
