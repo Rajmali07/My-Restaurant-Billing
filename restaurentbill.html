@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Restaurant Bill Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
+            color: #333;
+        }
+
+        h3,
+        h5 {
+            text-align: center;
+            color: #2c3e50;
+            text-shadow: 1px 1px 2px #bdc3c7;
+        }
+
+        label {
+            display: inline-block;
+            width: 120px;
+            margin-top: 10px;
+            color: #34495e;
+            font-weight: 600;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="date"] {
+            padding: 5px;
+            width: 200px;
+            margin-top: 10px;
+            border: 1px solid #2980b9;
+            border-radius: 4px;
+            background-color: #ecf0f1;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        input[type="date"]:focus {
+            border-color: #3498db;
+            outline: none;
+            background-color: #ffffff;
+        }
+
+        table {
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #2980b9;
+        }
+
+        th {
+            background-color: #3498db;
+            color: white;
+            padding: 12px;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #d6eaf8;
+        }
+
+        tbody tr:nth-child(odd) {
+            background-color: #ebf5fb;
+        }
+
+        td {
+            padding: 10px;
+            color: #2c3e50;
+        }
+
+        #addItemBtn {
+            margin: 10px auto;
+            display: block;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #2980b9;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            box-shadow: 0 4px 6px rgba(41, 128, 185, 0.4);
+            transition: background-color 0.3s ease;
+        }
+
+        #addItemBtn:hover {
+            background-color: #3498db;
+        }
+
+        button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(231, 76, 60, 0.4);
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #c0392b;
+        }
+
+        #totals {
+            width: 90%;
+            margin: 20px auto;
+            text-align: right;
+        }
+
+        #totals label {
+            width: auto;
+            margin-right: 20px;
+            color: #34495e;
+            font-weight: 600;
+        }
+
+        #totals div {
+            margin: 5px 0;
+            font-size: 16px;
+            color: #2c3e50;
+        }
+        .nav-invoice{
+            display: flex;
+        }
+        .border:hover{
+            border: 2px solid #34495e;
+        }
+        .nav-bill{
+            display: flex;
+        }
+    </style>
+</head>
+
+<body>
+    <h3>Restaurant Billing Invoice</h3>
+    <hr />
+    <section style="width: 90%; margin: auto;">
+        <h5>Invoice Details:</h5>
+        <div class="nav-invoice">
+            <label for="invoiceNumber">Invoice Number:</label>
+            <input class="border" type="text" id="invoiceNumber" required />
+            <label for="invoiceDate" style="margin-left: 40px;">Invoice Date:</label>
+            <input class="border" type="date" id="invoiceDate" required />
+            <label for="dueDate" style="margin-left: 40px;">Due Date:</label>
+            <input class="border" type="date" id="dueDate" required />
+        </div>
+        <h5>Bill To:</h5>
+        <div class="nav-bill">
+            <label for="customerName">Full Name:</label>
+            <input class="border" type="text" id="customerName" required />
+            <label for="customerAddress" style="margin-left: 40px;">Address:</label>
+            <input class="border" type="text" id="customerAddress" required />
+            <label for="customerContact" style="margin-left: 40px;">Contact:</label>
+            <input class="border" type="text" id="customerContact" required />
+        </div>
+    </section>
+
+    <h5>Itemized Bill</h5>
+    <table id="billTable">
+        <thead>
+            <tr>
+                <th>Food Name</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Total</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="billBody">
+        </tbody>
+    </table>
+    <button id="addItemBtn">Add Item</button>
+
+    <section id="totals">
+        <div><label>Subtotal:</label> <span id="subtotal">0.00</span></div>
+        <div><label>Tax (5%):</label> <span id="tax">0.00</span></div>
+        <div><label>Tip (10%):</label> <span id="tip">0.00</span></div>
+        <div><label><strong>Total:</strong></label> <span id="total">0.00</span></div>
+    </section>
+
+    <button id="printBillBtn" style="margin: 20px auto; display: block; padding: 10px 20px; font-size: 16px; cursor: pointer; background-color: #27ae60; color: white; border: none; border-radius: 6px; box-shadow: 0 4px 6px rgba(39, 174, 96, 0.4); transition: background-color 0.3s ease;">Print Bill</button>
+
+    <script>
+        const billBody = document.getElementById('billBody');
+        const addItemBtn = document.getElementById('addItemBtn');
+        const subtotalEl = document.getElementById('subtotal');
+        const taxEl = document.getElementById('tax');
+        const tipEl = document.getElementById('tip');
+        const totalEl = document.getElementById('total');
+
+        const foodItems = {
+            "Pizza": 100,
+            "Burger": 65,
+            "Samosha": 40,
+            "Ice-Cream": 20,
+            "Cold-Drink": 30,
+            "Sandwich": 40
+        };
+
+        function createCell(content, isInput = false, inputType = 'text', min = null) {
+            const td = document.createElement('td');
+            if (isInput) {
+                const input = document.createElement('input');
+                input.type = inputType;
+                if (min !== null) input.min = min;
+                input.value = content;
+                input.style.width = '80px';
+                input.addEventListener('input', updateTotals);
+                td.appendChild(input);
+            } else {
+                td.textContent = content;
+            }
+            return td;
+        }
+
+        function addItem(description = '', quantity = 1, unitPrice = 0) {
+            const tr = document.createElement('tr');
+
+            const descTd = document.createElement('td');
+            const descSelect = document.createElement('select');
+            descSelect.style.width = '150px';
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'Select';
+            descSelect.appendChild(defaultOption);
+
+            for (const food in foodItems) {
+                const option = document.createElement('option');
+                option.value = food;
+                option.textContent = food;
+                if (food === description) {
+                    option.selected = true;
+                }
+                descSelect.appendChild(option);
+            }
+            descTd.appendChild(descSelect);
+            tr.appendChild(descTd);
+
+            const qtyTd = createCell(quantity, true, 'number', 1);
+            tr.appendChild(qtyTd);
+
+            const priceTd = createCell(unitPrice.toFixed(2), true, 'number', 0);
+            tr.appendChild(priceTd);
+
+            const totalTd = createCell('0.00');
+            tr.appendChild(totalTd);
+
+            const actionTd = document.createElement('td');
+            const removeBtn = document.createElement('button');
+            removeBtn.textContent = 'Remove';
+            removeBtn.style.cursor = 'pointer';
+            removeBtn.addEventListener('click', () => {
+                tr.remove();
+                updateTotals();
+            });
+            actionTd.appendChild(removeBtn);
+            tr.appendChild(actionTd);
+
+            descSelect.addEventListener('change', () => {
+                const selectedFood = descSelect.value;
+                if (selectedFood && foodItems.hasOwnProperty(selectedFood)) {
+                    priceTd.querySelector('input').value = foodItems[selectedFood].toFixed(2);
+                } else {
+                    priceTd.querySelector('input').value = '0.00';
+                }
+                updateTotals();
+            });
+
+            qtyTd.querySelector('input').addEventListener('input', updateTotals);
+            priceTd.querySelector('input').addEventListener('input', updateTotals);
+
+            billBody.appendChild(tr);
+            updateTotals();
+        }
+
+        function updateTotals() {
+            let subtotal = 0;
+            const rows = billBody.querySelectorAll('tr');
+            rows.forEach(row => {
+                const qtyInput = row.cells[1].querySelector('input');
+                const priceInput = row.cells[2].querySelector('input');
+                const totalCell = row.cells[3];
+
+                const quantity = parseFloat(qtyInput.value) || 0;
+                const unitPrice = parseFloat(priceInput.value) || 0;
+                const total = quantity * unitPrice;
+
+                totalCell.textContent = total.toFixed(2);
+                subtotal += total;
+            });
+
+            const tax = subtotal * 0.05;
+            const tip = subtotal * 0.10;
+            const total = subtotal + tax + tip;
+
+            subtotalEl.textContent = subtotal.toFixed(2);
+            taxEl.textContent = tax.toFixed(2);
+            tipEl.textContent = tip.toFixed(2);
+            totalEl.textContent = total.toFixed(2);
+        }
+
+        addItemBtn.addEventListener('click', () => addItem());
+
+        addItem();
+
+        function generateInvoiceNumber() {
+            const now = new Date();
+            return 'INV' + now.getFullYear().toString().slice(-2) + 
+                (now.getMonth() + 1).toString().padStart(2, '0') + 
+                now.getDate().toString().padStart(2, '0') + 
+                now.getHours().toString().padStart(2, '0') + 
+                now.getMinutes().toString().padStart(2, '0') + 
+                now.getSeconds().toString().padStart(2, '0');
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const invoiceInput = document.getElementById('invoiceNumber');
+            if (invoiceInput) {
+                invoiceInput.value = generateInvoiceNumber();
+            }
+            const printBtn = document.getElementById('printBillBtn');
+            if (printBtn) {
+                printBtn.addEventListener('click', () => {
+                    window.print();
+                });
+            }
+        });
+    </script>
+    <footer style="text-align: center; margin: 20px 0; font-size: 14px; color: #777;">
+        &copy; 2025 || bihari.mali2023@ssimt.com || Raipur (C.G.)
+    </footer>
+</body>
+</html>
